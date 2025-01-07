@@ -1,4 +1,5 @@
 <script>
+
 export default {
     name: 'CategoriesIndex',
     data: () => ({
@@ -7,8 +8,22 @@ export default {
             {title: 'Name', key: 'name', align: 'left', sortable: true},
             {title: 'Actions', key: 'actions', sortable: false},
         ],
-        itemsPerPage: 3
-    })
+        itemsPerPage: 5,
+        itemsPerPageOptions: [
+            {title: '5', value: '5'},
+            {title: '10', value: '10'},
+            {title: '20', value: '20'},
+            {value: -1, title: '$vuetify.dataFooter.itemsPerPageAll'}
+        ]
+    }),
+    methods: {
+        editItem(item) {
+            console.log("Editar:", item);
+        },
+        deleteItem(item) {
+            console.log("Eliminar:", item);
+        },
+    }
 }
 </script>
 
@@ -36,41 +51,40 @@ defineProps({
 
             <v-container>
                 <v-row>
-                    <!--                    <v-col cols="auto">-->
-                    <!--                        <v-btn color="error">Delete Category</v-btn>-->
-                    <!--                    </v-col>-->
-                    <!--                    <v-col cols="auto">-->
-                    <!--                        <v-btn color="primary">Modify Category</v-btn>-->
-                    <!--                    </v-col>-->
-                    <v-col cols="auto">
+                    <v-col>
                         <Link :href="route('categories.index')">
-                            <v-btn color="success">Create Category</v-btn>
+                            <v-btn
+                                prepend-icon="mdi-plus"
+                                color="success">
+                                Create Category
+                            </v-btn>
                         </Link>
                     </v-col>
                 </v-row>
             </v-container>
 
-            <v-data-table-server
-                :items-per-page="itemsPerPage"
+            <v-data-table
+                v-model:items-per-page="itemsPerPage"
                 :headers="headers"
                 :items="Object.values(categories.data)"
-                :items-length="categories.total">
+                :items-length="categories.total"
+                :items-per-page-options="itemsPerPageOptions">
                 <template v-slot:item.actions="{ item }">
-                    <v-icon
-                        class="me-2 text-black"
-                        @click=""
-                    >
-                        mdi-pencil
-                    </v-icon>
-                    <v-icon
-                        class="text-black"
-                        @click=""
-                    >
-                        mdi-delete
-                    </v-icon>
+                    <v-btn
+                        class="m-2"
+                        icon="mdi-delete"
+                        color="error"
+                        @click="deleteItem(item)">
+                    </v-btn>
+                    <v-btn
+                        class="m-2"
+                        icon="mdi-pencil"
+                        @click="editItem(item)"
+                        color="primary">
+                    </v-btn>
                 </template>
 
-            </v-data-table-server>
+            </v-data-table>
 
         </template>
     </AppLayout>
