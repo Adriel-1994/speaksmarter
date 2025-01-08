@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -13,16 +14,8 @@ class CategoryController extends Controller
     public function index()
     {
         //
-        $categories = Category::paginate(25);
+        $categories = Category::orderBy('id')->paginate(25);
         return inertia('Categories/Index', ['categories' => $categories]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -30,38 +23,59 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        DB::beginTransaction();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        try {
+            $category = new Category();
+            $category->name = $request->name;
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+            $category->save();
+
+            DB::commit();
+        }catch (\Exception $exception){
+            DB::rollBack();
+            return back()->withErrors($exception->getMessage());
+        }
+        return back();
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Category $category)
     {
         //
+        DB::beginTransaction();
+
+        try {
+            $category->name = $request->name;
+            $category->save();
+
+            DB::commit();
+        }catch (\Exception $exception){
+            DB::rollBack();
+
+            return back()->withErrors($exception->getMessage());
+        }
+        return back();
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Category $category)
     {
         //
+        DB::beginTransaction();
+
+        try {
+            $category->delete();
+            DB::commit();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+
+            return back()->withErrors($exception->getMessage());
+        }
+        return back();
     }
 }

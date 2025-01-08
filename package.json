@@ -21,6 +21,7 @@
         "vue": "^3.3.13"
     },
     "dependencies": {
+        "sweetalert2": "^11.15.10",
         "vuetify": "^3.7.6"
     }
 }
