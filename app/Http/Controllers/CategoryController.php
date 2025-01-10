@@ -49,7 +49,8 @@ class CategoryController extends Controller
      */
     public function update(CategoryRequest $request, Category $category)
     {
-        //
+        $request->validated();
+
         DB::beginTransaction();
 
         try {
