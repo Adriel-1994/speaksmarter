@@ -10,30 +10,32 @@ export default {
             {title: 'Name', key: 'name', align: 'left', sortable: true},
             {title: 'Actions', key: 'actions', sortable: false},
         ],
-        itemsPerPage: 5,
-        itemsPerPageOptions: [
-            {title: '5', value: '5'},
-            {title: '10', value: '10'},
-            {title: '20', value: '20'},
-            {value: -1, title: '$vuetify.dataFooter.itemsPerPageAll'}
-        ],
+        itemsPerPage: null,
+        page: null,
+        canUpdate: false,
+        loading: false,
         newCategoryForm: useForm({
             id: null,
             name: ''
         }),
         newCategoryDialog: false,
-
     }),
     methods: {
+        fetchCategories(params) {
+            let isSamePage = this.page === params.page;
+            let isSameItemsPerPage = this.itemsPerPage === params.itemsPerPage;
+
+            if (this.canUpdate && (!isSamePage || !isSameItemsPerPage)) {
+                this.loading = true;
+                router.get('/categories', params);
+            }
+        },
         editItem(category) {
-            console.log("Editar:", category);
             this.newCategoryForm.id = category.id;
             this.newCategoryForm.name = category.name;
             this.newCategoryDialog = true;
         },
         deleteItem(id) {
-            console.log("Eliminar:", id);
-
             Swal.fire({
                 title: "Are you sure?",
                 text: "You won't be able to revert this!",
@@ -84,14 +86,14 @@ export default {
 
                         Swal.fire({
                             title: "Error updating category",
-                            text: JSON.stringify(errors),
+                            text: errors.name,
                             icon: "error",
                             confirmButtonText: "Close"
                         })
                     }
                 })
-            }else{
-                this.newCategoryForm.post(route('categories.store', this.newCategoryForm.id), {
+            } else {
+                this.newCategoryForm.post(route('categories.store'), {
                     onSuccess: () => {
                         this.newCategoryDialog = false;
 
@@ -107,7 +109,7 @@ export default {
 
                         Swal.fire({
                             title: "Error creating category",
-                            text: JSON.stringify(errors),
+                            text: errors.name,
                             icon: "error",
                             confirmButtonText: "Close"
                         })
@@ -122,6 +124,13 @@ export default {
                 this.newCategoryForm.reset();
             }
         }
+    },
+    mounted() {
+        this.page = this.categories.current_page ?? 1;
+        this.itemsPerPage = this.categories.per_page ?? 10;
+        this.$nextTick(() => {
+            this.canUpdate = true;
+        })
     }
 }
 </script>
@@ -147,15 +156,14 @@ defineProps({
             <h2 class="font-semibold text-xl text-gray-800 leading-tight pb-4">
                 Categories
             </h2>
-
             <!--            Dialog-->
             <v-dialog v-model="newCategoryDialog" max-width="600">
                 <template v-slot:activator="{ props: activatorProps}">
                     <v-row align="end" justify="end">
                         <v-btn v-if="$page.props.user.permissions.includes('create categories')"
-                            prepend-icon="mdi-plus"
-                            color="success"
-                            v-bind="activatorProps">
+                               prepend-icon="mdi-plus"
+                               color="success"
+                               v-bind="activatorProps">
                             Create Category
                         </v-btn>
                     </v-row>
@@ -209,28 +217,29 @@ defineProps({
             </v-dialog>
 
             <!--            data table-->
-            <v-data-table
-                v-model:items-per-page="itemsPerPage"
+            <v-data-table-server
+                :items-per-page="itemsPerPage"
                 :headers="headers"
                 :items="Object.values(categories.data)"
+                :page="page"
                 :items-length="categories.total"
-                :items-per-page-options="itemsPerPageOptions">
+                :loading="loading"
+                @update:options="fetchCategories">
                 <template v-slot:item.actions="{ item }">
                     <v-btn v-if="$page.props.user.permissions.includes('delete categories')"
-                        class="m-2"
-                        icon="mdi-delete"
-                        color="error"
-                        @click="deleteItem(item.id)">
+                           class="m-2"
+                           icon="mdi-delete"
+                           color="error"
+                           @click="deleteItem(item.id)">
                     </v-btn>
                     <v-btn v-if="$page.props.user.permissions.includes('update categories')"
-                        class="m-2"
-                        icon="mdi-pencil"
-                        @click="editItem(item)"
-                        color="primary">
+                           class="m-2"
+                           icon="mdi-pencil"
+                           @click="editItem(item)"
+                           color="primary">
                     </v-btn>
                 </template>
-
-            </v-data-table>
+            </v-data-table-server>
 
         </template>
     </AppLayout>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,18 +12,22 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
-        $categories = Category::orderBy('id')->paginate(25);
-        return inertia('Categories/Index', ['categories' => $categories]);
+        $categories = Category::orderBy('id')->paginate($request->get('itemsPerPage', 10));
+
+        return inertia('Categories/Index', [
+            'categories' => $categories
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CategoryRequest $request)
     {
+        $request->validated();
+
         DB::beginTransaction();
 
         try {
@@ -32,7 +37,7 @@ class CategoryController extends Controller
             $category->save();
 
             DB::commit();
-        }catch (\Exception $exception){
+        } catch (\Exception $exception) {
             DB::rollBack();
             return back()->withErrors($exception->getMessage());
         }
@@ -42,7 +47,7 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Category $category)
+    public function update(CategoryRequest $request, Category $category)
     {
         //
         DB::beginTransaction();
@@ -52,7 +57,7 @@ class CategoryController extends Controller
             $category->save();
 
             DB::commit();
-        }catch (\Exception $exception){
+        } catch (\Exception $exception) {
             DB::rollBack();
 
             return back()->withErrors($exception->getMessage());
