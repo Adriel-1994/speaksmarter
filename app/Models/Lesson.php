@@ -18,7 +18,8 @@ class Lesson extends Model
         'image_uri',
         'content_uri',
         'pdf_uri',
-        'level_id'
+        'level_id',
+        'is_free',
     ];
 
     public function categories():BelongsToMany{
