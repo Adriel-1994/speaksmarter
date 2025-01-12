@@ -226,18 +226,18 @@ defineProps({
                 :loading="loading"
                 @update:options="fetchCategories">
                 <template v-slot:item.actions="{ item }">
-                    <v-btn v-if="$page.props.user.permissions.includes('delete categories')"
+                    <v-icon v-if="$page.props.user.permissions.includes('delete categories')"
                            class="m-2"
                            icon="mdi-delete"
                            color="error"
                            @click="deleteItem(item.id)">
-                    </v-btn>
-                    <v-btn v-if="$page.props.user.permissions.includes('update categories')"
+                    </v-icon>
+                    <v-icon v-if="$page.props.user.permissions.includes('update categories')"
                            class="m-2"
                            icon="mdi-pencil"
                            @click="editItem(item)"
                            color="primary">
-                    </v-btn>
+                    </v-icon>
                 </template>
             </v-data-table-server>
 

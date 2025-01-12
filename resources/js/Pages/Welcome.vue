@@ -67,7 +67,7 @@ function handleImageError() {
                     Laravel v{{ laravelVersion }} (PHP v{{ phpVersion }})
                 </footer>
             </div>
-            {{$page.props}}
+
         </div>
     </div>
 </template>

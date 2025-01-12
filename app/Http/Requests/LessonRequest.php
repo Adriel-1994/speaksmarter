@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Lesson;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LessonRequest extends FormRequest
@@ -21,9 +22,15 @@ class LessonRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            "name" => "required|string|max:20|unique:lessons,name",
+        $rules = [
+            "name" => "required|string|max:20|unique:" . Lesson::class,
             "description" => "required|string|max:400",
         ];
+
+        if ($this->isMethod('PUT')) {
+            $rules["name"] = "required|string|max:20|unique:lessons,name," . $this->route('lesson.id');
+        }
+
+        return $rules;
     }
 }
